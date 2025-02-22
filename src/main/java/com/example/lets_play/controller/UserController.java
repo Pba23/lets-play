@@ -6,6 +6,8 @@ import com.example.lets_play.dto.UserDTO;
 import com.example.lets_play.model.User;
 import com.example.lets_play.service.UserService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -18,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDTO createUser(@RequestBody User userDTO) {
+    public UserDTO createUser(@Valid @RequestBody User userDTO) {
         return userService.createUser(userDTO);
     }
 

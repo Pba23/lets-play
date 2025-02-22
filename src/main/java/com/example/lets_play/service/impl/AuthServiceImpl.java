@@ -2,10 +2,8 @@ package com.example.lets_play.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
-// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +14,8 @@ import com.example.lets_play.service.AuthService;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -33,34 +33,37 @@ public class AuthServiceImpl implements AuthService {
         return passwordEncoder.encode(rawPassword);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public String login(String email, String password) {
-        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
-            throw new RuntimeException("Email et mot de passe sont requis");
+    public Map<String, String> login(String username, String password) {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            throw new RuntimeException("Username et mot de passe sont requis");
         }
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email ou mot de passe invalide"));
-
+    
+        User user = userRepository.findByName(username)
+                .orElseThrow(() -> new RuntimeException("Username invalide"));
+    
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Email ou mot de passe invalide");
+            throw new RuntimeException("Username ou mot de passe invalide");
         }
-
-        return Jwts.builder()
-                .setSubject(user.getEmail())
+    
+        String token = Jwts.builder()
+                .setSubject(user.getName()) // Utilisez le username comme sujet du token
+                .claim("role", user.getRole()) // Ajoutez le rôle de l'utilisateur dans le token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 jour
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(SECRET_KEY)
                 .compact();
+    
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        return response;
     }
 
     @Override
     public boolean validateToken(String token) {
         try {
-            @SuppressWarnings("deprecation")
-            Claims claims = Jwts.parser()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(SECRET_KEY)
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
             return claims.getExpiration().after(new Date());

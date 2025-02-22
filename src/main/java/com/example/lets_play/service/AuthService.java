@@ -1,7 +1,10 @@
 package com.example.lets_play.service;
 
+import java.util.Map;
+
 public interface AuthService {
-    String login(String email, String password);
+    
+    Map<String, String> login(String email, String password);
     boolean validateToken(String token); // 🔥 Vérifie bien cette signature !
 }
 

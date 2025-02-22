@@ -1,7 +1,7 @@
 # TODO List
 
 ## Étape 1 : Initialisation du projet
-- [ ] Créer un projet Spring Boot avec les dépendances suivantes :
+- [x] Créer un projet Spring Boot avec les dépendances suivantes :
   - Spring Web
   - Spring Data MongoDB
   - Spring Security
@@ -34,7 +34,7 @@
 ---
 
 ## Étape 5 : Services
-- [ ] Implémenter les services :
+- [x] Implémenter les services :
   - `UserService` :
     - Gérer la logique métier pour les utilisateurs (CRUD).
     - Hasher et saler les mots de passe avec BCrypt.
@@ -50,21 +50,21 @@
 ---
 
 ## Étape 6 : Configuration de la sécurité
-- [ ] Configurer `Spring Security` dans `SecurityConfig.java` :
+- [x] Configurer `Spring Security` dans `SecurityConfig.java` :
   - Permettre l'accès public à l'API "GET Products".
   - Exiger une authentification pour toutes les autres routes.
   - Ajouter des filtres pour valider les tokens JWT.
-- [ ] Implémenter un système basé sur les rôles (`ROLE_USER`, `ROLE_ADMIN`).
+- [x] Implémenter un système basé sur les rôles (`ROLE_USER`, `ROLE_ADMIN`).
 
 ---
 
 ## Étape 7 : Développement des contrôleurs
-- [ ] Créer les endpoints RESTful pour les utilisateurs :
+- [x] Créer les endpoints RESTful pour les utilisateurs :
   - `POST /users` : Créer un utilisateur.
   - `GET /users/{id}` : Lire un utilisateur.
   - `PUT /users/{id}` : Mettre à jour un utilisateur.
   - `DELETE /users/{id}` : Supprimer un utilisateur.
-- [ ] Créer les endpoints RESTful pour les produits :
+- [x] Créer les endpoints RESTful pour les produits :
   - `POST /products` : Créer un produit.
   - `GET /products` : Lire tous les produits (sans authentification).
   - `GET /products/{id}` : Lire un produit par son ID.
