@@ -8,17 +8,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.lets_play.repository.UserRepository;
+import com.example.lets_play.security.CustomAccessDeniedHandler;
+import com.example.lets_play.security.CustomAuthenticationEntryPoint;
 import com.example.lets_play.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -50,14 +49,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+            CustomAuthenticationEntryPoint authenticationEntryPoint,
+            CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/products/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter(userDetailsService()), UsernamePasswordAuthenticationFilter.class);
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint) // Capture 401
+                        .accessDeniedHandler(accessDeniedHandler)) // Capture 403
+                .addFilterBefore(jwtAuthenticationFilter(userDetailsService()),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -72,7 +77,8 @@ public class SecurityConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowedOriginPatterns(Arrays.asList("*"));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
-        corsConfig.setAllowedHeaders(Arrays.asList("Origin", "Accept", "X-Requested-With", "Content-Type", "Authorization"));
+        corsConfig.setAllowedHeaders(
+                Arrays.asList("Origin", "Accept", "X-Requested-With", "Content-Type", "Authorization"));
         corsConfig.setExposedHeaders(Arrays.asList("Authorization"));
         corsConfig.setAllowCredentials(true);
         corsConfig.setMaxAge(3600L);

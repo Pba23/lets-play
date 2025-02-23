@@ -29,10 +29,6 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    @GetMapping
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers();
-    }
 
     @PutMapping("/{id}")
     public UserDTO updateUser(@PathVariable String id, @RequestBody UserDTO userDTO) {
