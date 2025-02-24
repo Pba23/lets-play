@@ -8,8 +8,6 @@ import com.example.lets_play.service.UserService;
 
 import jakarta.validation.Valid;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

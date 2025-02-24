@@ -71,4 +71,11 @@ public class GlobalExceptionHandler {
      public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
          return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
      }
+     @ExceptionHandler(InvalidCredentialsException.class)
+     public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
+         Map<String, String> errorResponse = new HashMap<>();
+         errorResponse.put("error", "Unauthorized");
+         errorResponse.put("message", ex.getMessage());
+         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+     }
 }

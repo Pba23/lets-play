@@ -6,7 +6,10 @@ import io.jsonwebtoken.security.Keys;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.example.lets_play.exception.HttpStatus;
+import com.example.lets_play.exception.InvalidCredentialsException;
 import com.example.lets_play.model.User;
 import com.example.lets_play.repository.UserRepository;
 import com.example.lets_play.service.AuthService;
@@ -35,24 +38,24 @@ public class AuthServiceImpl implements AuthService {
 
     public Map<String, String> login(String username, String password) {
         if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
-            throw new RuntimeException("Username et mot de passe sont requis");
+            throw new InvalidCredentialsException("Username et mot de passe sont requis");
         }
-    
+
         User user = userRepository.findByName(username)
-                .orElseThrow(() -> new RuntimeException("Username invalide"));
-    
+                .orElseThrow(() -> new InvalidCredentialsException("Username invalides"));
+
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Username ou mot de passe invalide");
+            throw new InvalidCredentialsException("Identifiants invalides");
         }
-    
+
         String token = Jwts.builder()
-                .setSubject(user.getName()) // Utilisez le username comme sujet du token
-                .claim("role", user.getRole()) // Ajoutez le rôle de l'utilisateur dans le token
+                .setSubject(user.getName())
+                .claim("role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 jour
                 .signWith(SECRET_KEY)
                 .compact();
-    
+
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
         return response;

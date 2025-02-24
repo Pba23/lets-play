@@ -28,6 +28,7 @@ public class User {
     @NotBlank(message = "L'email est obligatoire.")
     private String email;
 
+    @NotBlank(message = "Le rôle est obligatoire.")
     @Pattern(regexp = "^(admin|user)$", message = "Le rôle doit être soit 'admin' soit 'user'.")
     private String role;
     private String password;

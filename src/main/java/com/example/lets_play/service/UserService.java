@@ -3,8 +3,10 @@ package com.example.lets_play.service;
 import com.example.lets_play.dto.UserDTO;
 import com.example.lets_play.model.User;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
+import java.util.List;
 
 public interface UserService {
     UserDTO createUser(User userDTO);

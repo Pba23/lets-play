@@ -74,16 +74,16 @@
 ---
 
 ## Étape 8 : Gestion des erreurs
-- [ ] Implémenter un gestionnaire global d'exceptions pour renvoyer des réponses cohérentes en cas d'erreurs.
-- [ ] Valider les entrées des utilisateurs avec les annotations `@Valid` et `@NotNull`.
+- [x] Implémenter un gestionnaire global d'exceptions pour renvoyer des réponses cohérentes en cas d'erreurs.
+- [x] Valider les entrées des utilisateurs avec les annotations `@Valid` et `@NotNull`.
 
 ---
 
 ## Étape 9 : Sécurité
-- [ ] Hasher les mots de passe avec BCrypt.
-- [ ] Protéger les API contre les injections MongoDB en validant les entrées.
-- [ ] Masquer les informations sensibles (ex. : mots de passe) dans les réponses.
-- [ ] Activer HTTPS.
+- [x] Hasher les mots de passe avec BCrypt.
+- [x] Protéger les API contre les injections MongoDB en validant les entrées.
+- [x] Masquer les informations sensibles (ex. : mots de passe) dans les réponses.
+- [x] Activer HTTPS.
 
 ---
 
