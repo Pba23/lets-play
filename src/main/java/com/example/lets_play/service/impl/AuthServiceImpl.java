@@ -6,43 +6,68 @@ import io.jsonwebtoken.security.Keys;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.example.lets_play.exception.HttpStatus;
+import com.example.lets_play.dto.UserDTO;
 import com.example.lets_play.exception.InvalidCredentialsException;
 import com.example.lets_play.model.User;
 import com.example.lets_play.repository.UserRepository;
 import com.example.lets_play.service.AuthService;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotBlank;
+
 import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
+
     private static final String SECRET_STRING = "MaSuperCleSecretePourJWTQuiEstAssezLongue123!";
     private final Key SECRET_KEY = Keys.hmacShaKeyFor(Base64.getEncoder().encode(SECRET_STRING.getBytes()));
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, Validator validator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.validator = validator;
     }
 
+    /**
+     * Méthode de validation pour User
+     */
+    private void validate(User user) {
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Validation échouée: " + violations.iterator().next().getMessage());
+        }
+    }
+
+    /**
+     * Enregistre un nouvel utilisateur après validation.
+     */
+    public UserDTO register(User user) {
+        validate(user); // Vérification des contraintes
+        user.setPassword(encodePassword(user.getPassword())); // Hashage du mot de passe
+        userRepository.save(user);
+        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
+    }
+
+    /**
+     * Encode un mot de passe en utilisant PasswordEncoder.
+     */
     public String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
 
-    public Map<String, String> login(String username, String password) {
-        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
-            throw new InvalidCredentialsException("Username et mot de passe sont requis");
-        }
-
+    /**
+     * Authentifie un utilisateur et génère un token JWT.
+     */
+    public Map<String, String> login(@NotBlank String username, @NotBlank String password) {
         User user = userRepository.findByName(username)
-                .orElseThrow(() -> new InvalidCredentialsException("Username invalides"));
+                .orElseThrow(() -> new InvalidCredentialsException("Nom d'utilisateur invalide"));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException("Identifiants invalides");
@@ -56,11 +81,12 @@ public class AuthServiceImpl implements AuthService {
                 .signWith(SECRET_KEY)
                 .compact();
 
-        Map<String, String> response = new HashMap<>();
-        response.put("token", token);
-        return response;
+        return Collections.singletonMap("token", token);
     }
 
+    /**
+     * Valide un token JWT.
+     */
     @Override
     public boolean validateToken(String token) {
         try {
