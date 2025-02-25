@@ -8,10 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 public interface UserService {
     UserDTO createUser(User userDTO);
     UserDTO getUserById(String id);
     List<UserDTO> getAllUsers();
-    UserDTO updateUser(String id, UserDTO userDTO);
+    ResponseEntity<UserDTO> updateUser(String id, UserDTO userDTO);
     void deleteUser(String id);
 }

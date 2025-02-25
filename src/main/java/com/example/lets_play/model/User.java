@@ -28,7 +28,7 @@ public class User {
     @NotBlank(message = "Le nom d'utilisateur est obligatoire.")
     private String name;
 
-    @Email(message = "L'email doit être valide.")
+    @Email(message = "L'email doit être au format valide, par exemple : exemple@domaine.com.")
     @NotBlank(message = "L'email est obligatoire.")
     private String email;
 

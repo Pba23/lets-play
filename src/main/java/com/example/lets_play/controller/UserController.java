@@ -1,5 +1,6 @@
 package com.example.lets_play.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.lets_play.dto.UserDTO;
@@ -29,7 +30,7 @@ public class UserController {
 
 
     @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable String id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable String id, @RequestBody UserDTO userDTO) {
         return userService.updateUser(id, userDTO);
     }
 

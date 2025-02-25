@@ -94,7 +94,7 @@
 ---
 
 ## Étape 11 : Tests
-- [ ] Écrire des tests unitaires pour les services.
+- [x] Écrire des tests unitaires pour les services.
 - [ ] Écrire des tests d'intégration pour les contrôleurs.
 - [ ] S'assurer qu'aucun endpoint ne génère de réponse 5XX.
 

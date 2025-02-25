@@ -1,5 +1,7 @@
 package com.example.lets_play.dto;
 
+import com.example.lets_play.exception.UnprocessableEntityException;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;

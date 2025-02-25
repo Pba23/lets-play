@@ -2,6 +2,7 @@ package com.example.lets_play.controller;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@Valid @RequestBody Map<String, String> request) {
-        String username = request.get("name");
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody Map<String, String> request) {
+        String username = request.get("email");
         String password = request.get("password");
         return authService.login(username, password);
     }
@@ -38,12 +39,12 @@ public class AuthController {
     public ResponseEntity<UserDTO> register(@Valid @RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             System.err.println("Utilisateur déjà existant");
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash du mot de passe
         userRepository.save(user);
 
-        return ResponseEntity.ok(new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole()));
     }
 }

@@ -10,6 +10,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class AuthServiceTest {
@@ -36,7 +37,7 @@ public class AuthServiceTest {
         // 🔹 Test 1: register (inscription réussie)
         User newUser = new User(null, "Alice", "alice@example.com", "user", "password123");
         try {
-            UserDTO createdUser = authService.register(newUser);
+            ResponseEntity<UserDTO> createdUser = authService.register(newUser);
             System.out.println("✅ register : " + createdUser);
         } catch (Exception e) {
             System.out.println("❌ register : " + e.getMessage());
@@ -68,7 +69,7 @@ public class AuthServiceTest {
 
         // 🔹 Test 5: login avec succès
         try {
-            var tokenResponse = authService.login("Alice", "password123");
+            var tokenResponse = authService.login("alice@example.com", "password123");
             System.out.println("✅ login : " + tokenResponse);
         } catch (Exception e) {
             System.out.println("❌ login (should pass) : " + e.getMessage());

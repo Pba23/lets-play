@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,11 +50,11 @@ public class AuthServiceImpl implements AuthService {
     /**
      * Enregistre un nouvel utilisateur après validation.
      */
-    public UserDTO register(User user) {
+    public ResponseEntity<UserDTO> register(User user) {
         validate(user); // Vérification des contraintes
         user.setPassword(encodePassword(user.getPassword())); // Hashage du mot de passe
         userRepository.save(user);
-        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole()));
     }
 
     /**
@@ -65,23 +67,24 @@ public class AuthServiceImpl implements AuthService {
     /**
      * Authentifie un utilisateur et génère un token JWT.
      */
-    public Map<String, String> login(@NotBlank String username, @NotBlank String password) {
-        User user = userRepository.findByName(username)
-                .orElseThrow(() -> new InvalidCredentialsException("Nom d'utilisateur invalide"));
-
+    public ResponseEntity<Map<String, String>> login(@NotBlank String Email, @NotBlank String password) {
+        User user = userRepository.findByEmail(Email)
+                .orElseThrow(() -> new InvalidCredentialsException("Aucun utilisateur avec cet email "));
+    
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException("Identifiants invalides");
         }
-
+    
         String token = Jwts.builder()
-                .setSubject(user.getName())
+                .setSubject(user.getId().toString()) // Utiliser l'ID de l'utilisateur comme sujet
                 .claim("role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 jour
                 .signWith(SECRET_KEY)
                 .compact();
-
-        return Collections.singletonMap("token", token);
+    
+                
+        return ResponseEntity.ok().body(Collections.singletonMap("token", token));
     }
 
     /**

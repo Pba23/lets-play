@@ -1,5 +1,7 @@
 package com.example.lets_play.service.impl;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,10 +66,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateUser(String id, UserDTO userDTO) {
+    public ResponseEntity<UserDTO> updateUser(String id, UserDTO userDTO) {
         // 🔹 Valide manuellement l'objet
         User user = userRepository.findById(id)
-        .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé"));
+        // Vérifier si l'email existe déjà
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            System.err.println("Email déjà existant");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // Retourner 409 Conflict
+        }
+
+
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         user.setRole(userDTO.getRole());
@@ -81,7 +90,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Erreur de validation : " + sb.toString().trim());
         }
         userRepository.save(user);
-        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
+        return ResponseEntity.ok(new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole()));
     }
 
     @Override

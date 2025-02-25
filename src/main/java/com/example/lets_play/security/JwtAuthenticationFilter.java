@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.lets_play.service.CustomUserDetailsService;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -29,25 +31,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String SECRET_STRING = "MaSuperCleSecretePourJWTQuiEstAssezLongue123!";
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor(Base64.getEncoder().encode(SECRET_STRING.getBytes()));
 
-    private final UserDetailsService userDetailsService;
+      private final CustomUserDetailsService userDetailsService; // Utiliser CustomUserDetailsService
 
-    public JwtAuthenticationFilter jwtAuthenticationFilter(UserDetailsService userDetailsService) {
-        return new JwtAuthenticationFilter(userDetailsService);
-    }
-
-    private String extractUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject(); // Le sujet est maintenant le username
-    }
 
     @Override
-    protected void doFilterInternal(@SuppressWarnings("null") HttpServletRequest request,
-            @SuppressWarnings("null") HttpServletResponse response,
-            @SuppressWarnings("null") FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -56,13 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String username = extractUsername(token);
+        String userId = extractUserId(token); // Extraire l'ID de l'utilisateur
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserById(userId); // Charger l'utilisateur par son ID
 
             if (validateToken(token)) {
-                // Récupérer le rôle du token
+                // Extraire le rôle du token
                 Claims claims = Jwts.parserBuilder()
                         .setSigningKey(SECRET_KEY)
                         .build()
@@ -80,6 +70,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractUserId(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject(); // Retourne l'ID de l'utilisateur
     }
 
     private boolean validateToken(String token) {

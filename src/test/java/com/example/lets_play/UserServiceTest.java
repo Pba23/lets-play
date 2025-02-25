@@ -9,6 +9,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 
@@ -47,7 +48,7 @@ public class UserServiceTest {
 
         // 🔹 Test 4: updateUser
         UserDTO updatedUser = new UserDTO(createdUser.getId(), "AliceUpdated", "alice.updated@example.com", "admin");
-        UserDTO resultUpdate = userService.updateUser(createdUser.getId(), updatedUser);
+        ResponseEntity<UserDTO> resultUpdate = userService.updateUser(createdUser.getId(), updatedUser);
         System.out.println("✅ updateUser : " + resultUpdate);
 
         // 🔹 Test 5: deleteUser

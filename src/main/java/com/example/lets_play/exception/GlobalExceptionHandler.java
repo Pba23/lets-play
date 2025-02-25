@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,8 +45,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-   
-
     // 📌 Gestion des erreurs inconnues pour éviter les 5XX
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
@@ -66,16 +65,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.");
     }
-     // 📌 Accès interdit (403 Forbidden) ou Non autorisé (401 Unauthorized)
-     @ExceptionHandler(ResponseStatusException.class)
-     public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
-         return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
-     }
-     @ExceptionHandler(InvalidCredentialsException.class)
-     public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
-         Map<String, String> errorResponse = new HashMap<>();
-         errorResponse.put("error", "Unauthorized");
-         errorResponse.put("message", ex.getMessage());
-         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-     }
+
+    // 📌 Accès interdit (403 Forbidden) ou Non autorisé (401 Unauthorized)
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Unauthorized");
+        errorResponse.put("message", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, String>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Méthode HTTP non supportée");
+        response.put("details", "La méthode " + ex.getMethod() + " n'est pas supportée pour cet endpoint.");
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<Map<String, String>> handleUnprocessableEntityException(UnprocessableEntityException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Entité non traitable");
+        response.put("details", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
 }

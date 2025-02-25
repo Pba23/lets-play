@@ -3,6 +3,7 @@ package com.example.lets_play.service.impl;
 import org.springframework.stereotype.Service;
 
 import com.example.lets_play.dto.ProductDTO;
+import com.example.lets_play.exception.UnprocessableEntityException;
 import com.example.lets_play.exception.UserNotFoundException;
 import com.example.lets_play.model.Product;
 import com.example.lets_play.model.User;
@@ -43,6 +44,17 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO createProduct(ProductDTO productDTO) {
         User user = userRepository.findById(productDTO.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé"));
+        double price;
+        try {
+            price = Double.parseDouble(productDTO.getPrice());
+        } catch (NumberFormatException e) {
+            throw new UnprocessableEntityException("Le prix doit être un nombre valide.");
+        }
+
+        // Validation : Le prix doit être positif
+        if (price < 0) {
+            throw new UnprocessableEntityException("Le prix doit être positif.");
+        }
 
         Product product = new Product();
         product.setName(productDTO.getName());
